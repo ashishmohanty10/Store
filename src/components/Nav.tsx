@@ -3,11 +3,11 @@
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { ComponentProps } from "react";
+import { ComponentProps, ReactNode } from "react";
 
-export function Nav({ children }: { children: React.ReactNode }) {
+export function Nav({ children }: { children: ReactNode }) {
   return (
-    <nav className="bg-primary text-primary-foreground flex justify-center px-4 ">
+    <nav className="bg-primary text-primary-foreground flex justify-center px-4">
       {children}
     </nav>
   );
@@ -15,7 +15,6 @@ export function Nav({ children }: { children: React.ReactNode }) {
 
 export function NavLink(props: Omit<ComponentProps<typeof Link>, "className">) {
   const pathname = usePathname();
-
   return (
     <Link
       {...props}
