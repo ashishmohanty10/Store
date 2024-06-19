@@ -14,11 +14,15 @@ async function getSalesData() {
     _sum: { priceInRupees: true },
     _count: true,
   });
-
+  await wait(2000);
   return {
     amount: (data._sum.priceInRupees || 0) / 100,
     numberOfSales: data._count,
   };
+}
+
+function wait(duration: number) {
+  return new Promise((ressolve) => setTimeout(ressolve, duration));
 }
 
 //getting the user data from backend ⤵️
