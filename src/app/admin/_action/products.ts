@@ -60,6 +60,63 @@ export async function addProduct(prevState: unknown, formData: FormData) {
   redirect("/admin/products");
 }
 
+const editSchema = addSchema.extend({
+  file: fileSchema.optional(),
+  image: imageSchema.optional(),
+});
+
+export async function updateProduct(
+  id: string,
+  prevState: unknown,
+  formData: FormData
+) {
+  const result = editSchema.safeParse(Object.fromEntries(formData.entries()));
+  if (result.success === false) {
+    return result.error.formErrors.fieldErrors;
+  }
+
+  const data = result.data;
+  const product = await prisma.product.findUnique({
+    where: { id },
+  });
+
+  if (product == null) return notFound();
+
+  let filepath = product.filepath;
+
+  if (data.file != null && data.file.size > 0) {
+    await fs.unlink(product.filepath);
+    //create the filepath for the  file to be saved
+    filepath = `product/${crypto.randomUUID()}-${data.file.name}`;
+    //saves the file to the filepath
+    await fs.writeFile(filepath, Buffer.from(await data.file.arrayBuffer()));
+  }
+
+  let imagePath = product.imagePath;
+
+  if (data.image != null && data.image.size > 0) {
+    await fs.unlink(`public/${product.imagePath}`);
+    const imagePath = `/product/${crypto.randomUUID()}-${data.image.name}`;
+    //saves the images to the filepath
+    await fs.writeFile(
+      `public${imagePath}`,
+      Buffer.from(await data.image.arrayBuffer())
+    );
+  }
+
+  await prisma.product.update({
+    where: { id },
+    data: {
+      name: data.name,
+      description: data.description,
+      priceInRupees: data.priceInRupees,
+      filepath,
+      imagePath,
+    },
+  });
+
+  redirect("/admin/products");
+}
 export async function toggleProductAvailability(
   id: string,
   isAvailableForPurchase: boolean
